@@ -27,7 +27,7 @@ public class Main {
         c.addOSCListener( new OSCListener() {
             public void messageReceived(OSCMessage m, SocketAddress addr, long time )
             {
-                // first of all, send a reply message (just a demo)
+                // first of all, send a reply message (justgz a demo)
                 try {
                     c.send( new OSCMessage( "/done", new Object[] { m.getName() }), addr );
                 }
