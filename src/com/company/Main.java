@@ -53,21 +53,25 @@ public class Main {
 
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time);
-                // hello initiates communication and server saves clients adress
 
                 distMessages(m, addr);
+
+                // hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
                     System.out.println("/hello from " + addr);
+                    Boolean alreadyExists = false;
                     for (SocketAddress socketAddress : clientList) {
                         if (socketAddress.equals(addr)) {
+                            alreadyExists = true;
+                        }
+                        if (!alreadyExists) {
                             this.clientList.add(addr);
                             try {
                                 c.send(new OSCMessage("/helloBack", new Object[]{m.getName()}), socketAddress);
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             }
-                        }
-                        else
+                        } else
                             System.out.println("ADRESS ALREADY IN LIST");
                     }
                 }
