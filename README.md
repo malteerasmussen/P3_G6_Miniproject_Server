@@ -13,6 +13,7 @@ Player%/
 * children are GUI & Sound
 
 Player%/GUI
+* setPlayerID/%int%
 * spot/%/taken or release
 * avatar/%id%
 

@@ -36,10 +36,9 @@ public class Main {
 
                 for (SocketAddress socketAddress : clientList) {
                     System.out.println("socketAddress: " + socketAddress);
-                    //    send to everybody but the recepient
+                    //    send to everybody but the recipient
                     if (!socketAddress.equals(from)) {
                         try {
-                            System.out.println("koko ");
                             c.send(new OSCMessage("/server", new Object[]{m.getName()}), from);
                         } catch (IOException e1) {
                             e1.printStackTrace();
@@ -52,7 +51,7 @@ public class Main {
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time);
 
                 distMessages(m, addr);
-
+//                **************************************************************************
                 // hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
                     System.out.println("/hello from " + addr);
@@ -60,18 +59,21 @@ public class Main {
                     for (SocketAddress socketAddress : clientList) {
                         if (socketAddress.equals(addr)) {
                             alreadyExists = true;
+                            break;
                         }
-                        if (!alreadyExists) {
-                            this.clientList.add(addr);
-                            try {
-                                c.send(new OSCMessage("/helloBack", new Object[]{m.getName()}), socketAddress);
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            }
-                        } else
-                            System.out.println("ADRESS ALREADY IN LIST");
                     }
+                    if (!alreadyExists) {
+                        this.clientList.add(addr);
+                        System.out.println("New player connected, now there's " + clientList.size());
+                        try {
+                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size()}), addr);
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    } else
+                        System.out.println("ADRESS ALREADY IN LIST");
                 }
+
 
                 if (m.getName().
 
@@ -133,7 +135,6 @@ public class Main {
                 IOException e1) {
             e1.printStackTrace();
         }
-
         // kill the server, free its resources
         c.dispose();
     }
