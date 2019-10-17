@@ -33,7 +33,6 @@ public class Main {
             List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
             void distMessages(OSCMessage m, SocketAddress from) {
-
                 for (SocketAddress socketAddress : clientList) {
                     System.out.println("socketAddress: " + socketAddress);
                     //    send to everybody but the recipient
@@ -50,8 +49,8 @@ public class Main {
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time);
 
-                distMessages(m, addr);
-//                **************************************************************************
+                //distMessages(m, addr);
+//                ******************************************************************************************************
                 // hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
                     System.out.println("/hello from " + addr);
@@ -75,34 +74,26 @@ public class Main {
                 }
 
 
-                if (m.getName().
-
-                        equals("/test")) {
+                if (m.getName().equals("/test")) {
                     for (int i = 0; i < m.getArgCount(); i++)
                         System.out.println(m.getArg(i));
 //                    System.out.println(m.;
                     System.out.println("YASSSS");
                 }
 
-                if (m.getName().
-
-                        equals("/pause")) {
+                if (m.getName().equals("/pause")) {
                     // tell the main thread to pause the server,
                     // wake up the main thread
                     pause = true;
                     synchronized (sync) {
                         sync.notifyAll();
                     }
-                } else if (m.getName().
-
-                        equals("/quit")) {
+                } else if (m.getName().equals("/quit")) {
                     // wake up the main thread
                     synchronized (sync) {
                         sync.notifyAll();
                     }
-                } else if (m.getName().
-
-                        equals("/dumpOSC")) {
+                } else if (m.getName().equals("/dumpOSC")) {
                     // change dumping behaviour
                     c.dumpOSC(((Number) m.getArg(0)).intValue(), System.err);
                 }
