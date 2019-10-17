@@ -21,7 +21,7 @@ public class Main {
         final OSCServer c;
         try {
             // create TCP server on loopback port 0x5454
-            c = OSCServer.newUsing(OSCServer.UDP, 8001, true);
+            c = OSCServer.newUsing(OSCServer.UDP, 8000, true);
         } catch (IOException e1) {
             e1.printStackTrace();
             return;
@@ -29,9 +29,6 @@ public class Main {
 
         // now add a listener for incoming messages from
         // any of the active connections
-//        String[] clientAddrs= new String[5];
-
-
         c.addOSCListener(new OSCListener() {
             List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
