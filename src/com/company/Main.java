@@ -15,13 +15,13 @@ public class Main {
 
     public static void main(String[] args) {
         // write your code here
-
+        long timeElapsed = System.nanoTime();
 
         final Object sync = new Object();
         final OSCServer c;
         try {
             // create TCP server on loopback port 0x5454
-            c = OSCServer.newUsing(OSCServer.UDP, 8000, true);
+            c = OSCServer.newUsing(OSCServer.UDP, 8000);
         } catch (IOException e1) {
             e1.printStackTrace();
             return;
@@ -38,7 +38,8 @@ public class Main {
                     //    send to everybody but the recipient
                     if (!socketAddress.equals(from)) {
                         try {
-                            c.send(new OSCMessage("/server", new Object[]{m.getName()}), from);
+                            System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
+                            c.send(new OSCMessage("/server/" + m.getName() , new Object[]{}), socketAddress);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
@@ -49,9 +50,9 @@ public class Main {
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time);
 
-                //distMessages(m, addr);
+                distMessages(m, addr);
 //                ******************************************************************************************************
-                // hello initiates communication and server saves clients in clientList
+                // /hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
                     System.out.println("/hello from " + addr);
                     Boolean alreadyExists = false;
@@ -65,13 +66,15 @@ public class Main {
                         this.clientList.add(addr);
                         System.out.println("New player connected, now there's " + clientList.size());
                         try {
-                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size()}), addr);
+                            System.out.println("NANOTIME: " + timeElapsed);
+                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(),timeElapsed}), addr);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
                     } else
                         System.out.println("ADRESS ALREADY IN LIST");
                 }
+//                ******************************************************************************************************
 
 
                 if (m.getName().equals("/test")) {
