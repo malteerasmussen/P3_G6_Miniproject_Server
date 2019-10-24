@@ -21,7 +21,7 @@ public class Main {
         final OSCServer c;
         try {
             // create TCP server on loopback port 0x5454
-            c = OSCServer.newUsing(OSCServer.UDP, 8000, true);
+            c = OSCServer.newUsing(OSCServer.UDP, 8000, false);
         } catch (IOException e1) {
             e1.printStackTrace();
             return;
