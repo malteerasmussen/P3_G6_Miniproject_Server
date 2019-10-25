@@ -46,10 +46,33 @@ public class Main {
                 }
             }
 
-            public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
-                System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time);
+            void distMessages(OSCMessage m, SocketAddress from, int spot, int instrument, String operation) {
+                for (SocketAddress socketAddress : clientList) {
+                    System.out.println("socketAddress: " + socketAddress);
+                    //    send to everybody but the recipient
+                    if (!socketAddress.equals(from)) {
+                        try {
+                            System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
+                            c.send(new OSCMessage("/server/" + m.getName() , new Object[]{spot,instrument,operation}), socketAddress);
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }
+            }
 
-                distMessages(m, addr);
+            public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
+                System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
+
+                if (m.getName().equals("/GUImessage")) {
+                    System.out.println("GUImessage received with " + m.getArgCount() + " arguments");
+                    int spot = (int) m.getArg(0);
+                    int instrument = (int) m.getArg(1);
+                    String operation = (String) m.getArg(2);
+                    distMessages(m, addr, spot, instrument, operation);
+                } else {
+                    distMessages(m, addr);
+                }
 //                ******************************************************************************************************
                 // /hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
