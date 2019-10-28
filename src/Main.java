@@ -50,12 +50,9 @@ public class Main {
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
 
+                // receives messages containing an object and distributes it
                 if (m.getArgCount() > 1) {
-                    System.out.println("GUImessage received with " + m.getArgCount() + " arguments");
-                    int spot = (int) m.getArg(0);
-                    int instrument = (int) m.getArg(1);
-                    String operation = (String) m.getArg(2);
-                    distMessages(m, addr, spot, instrument, operation);
+                    distMessages(m, addr, (int) m.getArg(0), (int) m.getArg(1), (String) m.getArg(2));
                 }
 
 //                ******************************************************************************************************
