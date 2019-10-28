@@ -31,20 +31,6 @@ public class Main {
         c.addOSCListener(new OSCListener() {
             List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
-            void distMessages(OSCMessage m, SocketAddress from) {
-                for (SocketAddress socketAddress : clientList) {
-                    System.out.println("socketAddress: " + socketAddress);
-                    //    send to everybody but the recipient
-                    if (!socketAddress.equals(from)) {
-                        try {
-                            System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
-                            c.send(new OSCMessage("/server/" + m.getName() , new Object[]{}), socketAddress);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                }
-            }
 
             void distMessages(OSCMessage m, SocketAddress from, int spot, int instrument, String operation) {
                 for (SocketAddress socketAddress : clientList) {
@@ -53,7 +39,7 @@ public class Main {
                     if (!socketAddress.equals(from)) {
                         try {
                             System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
-                            c.send(new OSCMessage("/server/" + m.getName() , new Object[]{spot,instrument,operation}), socketAddress);
+                            c.send(new OSCMessage("/server" + m.getName(), new Object[]{spot, instrument, operation}), socketAddress);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
@@ -64,15 +50,14 @@ public class Main {
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
 
-                if (m.getName().equals("/GUImessage")) {
+                if (m.getArgCount() > 1) {
                     System.out.println("GUImessage received with " + m.getArgCount() + " arguments");
                     int spot = (int) m.getArg(0);
                     int instrument = (int) m.getArg(1);
                     String operation = (String) m.getArg(2);
                     distMessages(m, addr, spot, instrument, operation);
-                } else {
-                    distMessages(m, addr);
                 }
+
 //                ******************************************************************************************************
                 // /hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
@@ -89,7 +74,7 @@ public class Main {
                         System.out.println("New player connected, now there's " + clientList.size());
                         try {
                             System.out.println("NANOTIME: " + timeElapsed);
-                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(),timeElapsed}), addr);
+                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(), timeElapsed}), addr);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
