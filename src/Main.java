@@ -119,7 +119,7 @@ public class Main {
                 }
 //                ******************************************************************************************************
 
-
+                /*
                 if (m.getName().equals("/test")) {
                     for (int i = 0; i < m.getArgCount(); i++)
                         System.out.println(m.getArg(i));
@@ -142,9 +142,10 @@ public class Main {
                 } else if (m.getName().equals("/dumpOSC")) {
                     // change dumping behaviour
                     c.dumpOSC(((Number) m.getArg(0)).intValue(), System.err);
-                }
+                } */
             }
         });
+        /*
         try {
             do {
                 if (pause) {
@@ -172,6 +173,8 @@ public class Main {
                 IOException e1) {
             e1.printStackTrace();
         }
+        */
+
         // kill the server, free its resources
         c.dispose();
     }
