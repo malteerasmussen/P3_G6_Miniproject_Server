@@ -73,6 +73,10 @@ public class Main {
                         stageSpotTaken[(int) m.getArg(0)] = false;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("reserve")){
+                        stageSpotTaken[(int) m.getArg(0)] = true;
+                        instrumentId[(int) m.getArg(0)] = -1;
+                    }
                 }
 
 //                ******************************************************************************************************
@@ -95,6 +99,9 @@ public class Main {
                             for (int i = 0; i < instrumentId.length; i++){
                                 if (stageSpotTaken[i] && instrumentId[i] != -1) {
                                     c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "take"}), addr);
+                                }
+                                if (stageSpotTaken[i] && instrumentId[i] == -1) {
+                                    c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "reserve"}), addr);
                                 }
                             }
                         } catch (IOException e1) {
