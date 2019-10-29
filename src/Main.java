@@ -77,6 +77,10 @@ public class Main {
                         stageSpotTaken[(int) m.getArg(0)] = true;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("release")){
+                        stageSpotTaken[(int) m.getArg(0)] = false;
+                        instrumentId[(int) m.getArg(0)] = -1;
+                    }
                 }
 
 //                ******************************************************************************************************
