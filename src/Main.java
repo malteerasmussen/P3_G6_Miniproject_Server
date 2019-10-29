@@ -38,7 +38,7 @@ public class Main {
                     if (!socketAddress.equals(from)) {
                         try {
                             System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
-                            c.send(new OSCMessage("/server/" + m.getName() , new Object[]{}), socketAddress);
+                            c.send(new OSCMessage("/server" + m.getName() , new Object[]{}), socketAddress);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
