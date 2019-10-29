@@ -9,10 +9,21 @@ import java.util.List;
 public class Main {
     private static boolean pause = false; // (must be an instance or static field to be useable
 
+
+
+
     // from an anonymous inner class)
 
 
     public static void main(String[] args) {
+        boolean[] stageSpotTaken = new boolean[4];
+        int[] instrumentId = {
+                -1,
+                -1,
+                -1,
+                -1
+        };
+
         // write your code here
         long timeElapsed = System.nanoTime();
 
@@ -31,20 +42,6 @@ public class Main {
         c.addOSCListener(new OSCListener() {
             List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
-            void distMessages(OSCMessage m, SocketAddress from) {
-                for (SocketAddress socketAddress : clientList) {
-                    System.out.println("socketAddress: " + socketAddress);
-                    //    send to everybody but the recipient
-                    if (!socketAddress.equals(from)) {
-                        try {
-                            System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
-                            c.send(new OSCMessage("/server" + m.getName() , new Object[]{}), socketAddress);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                }
-            }
 
             void distMessages(OSCMessage m, SocketAddress from, int spot, int instrument, String operation) {
                 for (SocketAddress socketAddress : clientList) {
@@ -53,7 +50,7 @@ public class Main {
                     if (!socketAddress.equals(from)) {
                         try {
                             System.out.println("DISTRIBUTING MESSAGE: " + m.getName() + " TO: " + socketAddress);
-                            c.send(new OSCMessage("/server/" + m.getName() , new Object[]{spot,instrument,operation}), socketAddress);
+                            c.send(new OSCMessage("/server" + m.getName(), new Object[]{spot, instrument, operation}), socketAddress);
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
@@ -62,22 +59,27 @@ public class Main {
             }
 
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
+
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
 
-                if (m.getName().equals("/GUImessage")) {
-                    System.out.println("GUImessage received with " + m.getArgCount() + " arguments");
-                    int spot = (int) m.getArg(0);
-                    int instrument = (int) m.getArg(1);
-                    String operation = (String) m.getArg(2);
-                    distMessages(m, addr, spot, instrument, operation);
-                } else {
-                    distMessages(m, addr);
+                // receives messages containing an object and distributes it
+                if (m.getArgCount() > 1) {
+                    distMessages(m, addr, (int) m.getArg(0), (int) m.getArg(1), (String) m.getArg(2));
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("take")){
+                        stageSpotTaken[(int) m.getArg(0)] = true;
+                        instrumentId[(int) m.getArg(0)] = (int) m.getArg(1);
+                    }
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("leave")){
+                        stageSpotTaken[(int) m.getArg(0)] = false;
+                        instrumentId[(int) m.getArg(0)] = -1;
+                    }
                 }
+
 //                ******************************************************************************************************
                 // /hello initiates communication and server saves clients in clientList
                 if (m.getName().equals("/hello")) {
                     System.out.println("/hello from " + addr);
-                    Boolean alreadyExists = false;
+                    boolean alreadyExists = false;
                     for (SocketAddress socketAddress : clientList) {
                         if (socketAddress.equals(addr)) {
                             alreadyExists = true;
@@ -89,7 +91,12 @@ public class Main {
                         System.out.println("New player connected, now there's " + clientList.size());
                         try {
                             System.out.println("NANOTIME: " + timeElapsed);
-                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(),timeElapsed}), addr);
+                            c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(), timeElapsed}), addr);
+                            for (int i = 0; i < instrumentId.length; i++){
+                                if (stageSpotTaken[i] && instrumentId[i] != -1) {
+                                    c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "take"}), addr);
+                                }
+                            }
                         } catch (IOException e1) {
                             e1.printStackTrace();
                         }
