@@ -107,9 +107,6 @@ public class Main {
                                 if (stageSpotTaken[i] && instrumentId[i] == -1) {
                                     c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "reserve"}), addr);
                                 }
-                                if (!stageSpotTaken[i] && instrumentId[i] == -1) {
-                                    c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "release"}), addr);
-                                }
                             }
                         } catch (IOException e1) {
                             e1.printStackTrace();
