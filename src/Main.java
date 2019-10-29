@@ -145,7 +145,9 @@ public class Main {
                 } */
             }
         });
-        /*
+
+
+
         try {
             do {
                 if (pause) {
@@ -173,10 +175,12 @@ public class Main {
                 IOException e1) {
             e1.printStackTrace();
         }
-        */
+
 
         // kill the server, free its resources
         c.dispose();
+
+
     }
 
 }
