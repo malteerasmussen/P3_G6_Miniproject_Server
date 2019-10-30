@@ -16,13 +16,11 @@ public class Main {
 
 
     public static void main(String[] args) {
-        boolean[] stageSpotTaken = new boolean[4]; // Stores if a stagespots are taken
-        int[] instrumentId = { // Stores which instruments are chosen on a certain stagespot
-                -1,
-                -1,
-                -1,
-                -1
-        };
+        int[] stageSpotTaken = {-1, -1, -1, -1}; // Stores if a stagespots are taken
+        int[] instrumentId = {-1, -1, -1, -1}; // Stores which instruments are chosen on a certain stagespot
+
+        List<SocketAddress> clientList = new ArrayList<SocketAddress>();
+        List<Long> timerList = new ArrayList<Long>();
 
         // write your code here
         long timeElapsed = System.nanoTime();
@@ -40,7 +38,6 @@ public class Main {
         // now add a listener for incoming messages from
         // any of the active connections
         c.addOSCListener(new OSCListener() {
-            List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
             // Distribute messages to all clients except the client it received the message from
             void distMessages(OSCMessage m, SocketAddress from, int spot, int instrument, String operation) {
@@ -60,28 +57,39 @@ public class Main {
             // Determent how to handle the messages
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
 
-                System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
+                // Display when receiving a message from a client - except status messages
+                if (!m.getName().contains("status")) {
+                    System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
+                }
 
                 // receives messages containing an object and distributes it
                 if (m.getArgCount() > 1) {
                     distMessages(m, addr, (int) m.getArg(0), (int) m.getArg(1), (String) m.getArg(2));
-                    if (m.getArgCount() > 2 && m.getArg(2).equals("take")){
-                        stageSpotTaken[(int) m.getArg(0)] = true;
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("take")) {
+                        stageSpotTaken[(int) m.getArg(0)] = clientList.indexOf(addr);
                         instrumentId[(int) m.getArg(0)] = (int) m.getArg(1);
                     }
-                    if (m.getArgCount() > 2 && m.getArg(2).equals("leave")){
-                        stageSpotTaken[(int) m.getArg(0)] = false;
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("leave")) {
+                        stageSpotTaken[(int) m.getArg(0)] = -1;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
-                    if (m.getArgCount() > 2 && m.getArg(2).equals("reserve")){
-                        stageSpotTaken[(int) m.getArg(0)] = true;
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("reserve")) {
+                        stageSpotTaken[(int) m.getArg(0)] = clientList.indexOf(addr);
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
-                    if (m.getArgCount() > 2 && m.getArg(2).equals("release")){
-                        stageSpotTaken[(int) m.getArg(0)] = false;
+                    if (m.getArgCount() > 2 && m.getArg(2).equals("release")) {
+                        stageSpotTaken[(int) m.getArg(0)] = -1;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
                 }
+                if (m.getName().contains("status")) {
+                    for (int i = 0; i < clientList.size(); i++) {
+                        if (clientList.get(i).equals(addr)) {
+                            timerList.set(i, System.currentTimeMillis());
+                        }
+                    }
+                }
+
 
 //                ******************************************************************************************************
                 // /hello initiates communication and server saves clients in clientList
@@ -94,17 +102,18 @@ public class Main {
                             break;
                         }
                     }
-                    if (!alreadyExists) { // Send messages to clients 
-                        this.clientList.add(addr);
+                    if (!alreadyExists) { // Send messages to clients
+                        clientList.add(addr);
+                        timerList.add(System.currentTimeMillis());
                         System.out.println("New player connected, now there's " + clientList.size());
                         try {
                             System.out.println("NANOTIME: " + timeElapsed);
                             c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(), timeElapsed}), addr);
-                            for (int i = 0; i < instrumentId.length; i++){
-                                if (stageSpotTaken[i] && instrumentId[i] != -1) {
+                            for (int i = 0; i < instrumentId.length; i++) {
+                                if (stageSpotTaken[i] != -1 && instrumentId[i] != -1) {
                                     c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "take"}), addr);
                                 }
-                                if (stageSpotTaken[i] && instrumentId[i] == -1) {
+                                if (stageSpotTaken[i] != -1 && instrumentId[i] == -1) {
                                     c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "reserve"}), addr);
                                 }
                             }
@@ -112,12 +121,47 @@ public class Main {
                             e1.printStackTrace();
                         }
                     } else
-                        System.out.println("ADRESS ALREADY IN LIST");
+                        System.out.println("ADDRESS ALREADY IN LIST");
                 }
             }
         });
 
         // *****************************************************************************************************
+
+        // Thread for checking status of clients
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                    for (int i = 0; i < clientList.size(); i++) {
+                        // check if clients have not send status for 6 seconds
+                        if ((System.currentTimeMillis() - timerList.get(i)) / 1000 > 6) {
+                            System.out.println("Client " + clientList.get(i) + " is inactive");
+                            for (int j = 0; j < stageSpotTaken.length; j++) {
+                                // check if the client who is inactive has occupied a stageSpot
+                                if (stageSpotTaken[j] == i) {
+                                    for (SocketAddress socketAddress : clientList) {
+                                        try {
+                                            // release the spot for all clients
+                                            c.send(new OSCMessage("/server/GUImessage", new Object[]{j, instrumentId[j], "leave"}), socketAddress);
+                                        } catch (IOException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                    }
+                                    stageSpotTaken[j] = -1;
+                                    instrumentId[j] = -1;
+                                }
+                            }
+                            timerList.remove(i);
+                            clientList.remove(i);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
 
         try {
             do {
@@ -146,6 +190,8 @@ public class Main {
                 IOException e1) {
             e1.printStackTrace();
         }
+
+
         // kill the server, free its resources
         c.dispose();
 
