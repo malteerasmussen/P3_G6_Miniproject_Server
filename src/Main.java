@@ -16,8 +16,8 @@ public class Main {
 
 
     public static void main(String[] args) {
-        boolean[] stageSpotTaken = new boolean[4];
-        int[] instrumentId = {
+        boolean[] stageSpotTaken = new boolean[4]; // Stores if a stagespots are taken
+        int[] instrumentId = { // Stores which instruments are chosen on a certain stagespot
                 -1,
                 -1,
                 -1,
@@ -28,7 +28,7 @@ public class Main {
         long timeElapsed = System.nanoTime();
 
         final Object sync = new Object();
-        final OSCServer c;
+        final OSCServer c; // This is the server
         try {
             // create TCP server on loopback port 0x5454
             c = OSCServer.newUsing(OSCServer.UDP, 8000);
@@ -42,9 +42,9 @@ public class Main {
         c.addOSCListener(new OSCListener() {
             List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
-
+            // Distribute messages to all clients except the client it received the message from
             void distMessages(OSCMessage m, SocketAddress from, int spot, int instrument, String operation) {
-                for (SocketAddress socketAddress : clientList) {
+                for (SocketAddress socketAddress : clientList) { // Checks all clients in the clientList
                     System.out.println("socketAddress: " + socketAddress);
                     //    send to everybody but the recipient
                     if (!socketAddress.equals(from)) {
@@ -57,7 +57,7 @@ public class Main {
                     }
                 }
             }
-
+            // Determent how to handle the messages
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
 
                 System.out.println("MESSAGE RECEIVED " + m.getName() + " FROM: " + addr + ", TIME: " + time + ", ARGS: " + m.getArgCount());
@@ -88,13 +88,13 @@ public class Main {
                 if (m.getName().equals("/hello")) {
                     System.out.println("/hello from " + addr);
                     boolean alreadyExists = false;
-                    for (SocketAddress socketAddress : clientList) {
+                    for (SocketAddress socketAddress : clientList) { //Checks if the client is already in the clientList
                         if (socketAddress.equals(addr)) {
                             alreadyExists = true;
                             break;
                         }
                     }
-                    if (!alreadyExists) {
+                    if (!alreadyExists) { // Send messages to clients 
                         this.clientList.add(addr);
                         System.out.println("New player connected, now there's " + clientList.size());
                         try {
@@ -114,40 +114,14 @@ public class Main {
                     } else
                         System.out.println("ADRESS ALREADY IN LIST");
                 }
-//                ******************************************************************************************************
-
-                /*
-                if (m.getName().equals("/test")) {
-                    for (int i = 0; i < m.getArgCount(); i++)
-                        System.out.println(m.getArg(i));
-//                    System.out.println(m.;
-                    System.out.println("YASSSS");
-                }
-
-                if (m.getName().equals("/pause")) {
-                    // tell the main thread to pause the server,
-                    // wake up the main thread
-                    pause = true;
-                    synchronized (sync) {
-                        sync.notifyAll();
-                    }
-                } else if (m.getName().equals("/quit")) {
-                    // wake up the main thread
-                    synchronized (sync) {
-                        sync.notifyAll();
-                    }
-                } else if (m.getName().equals("/dumpOSC")) {
-                    // change dumping behaviour
-                    c.dumpOSC(((Number) m.getArg(0)).intValue(), System.err);
-                } */
             }
         });
 
-
+        // *****************************************************************************************************
 
         try {
             do {
-                if (pause) {
+                if (pause) { // This must be included for the server to work (we don't use it, tho)
                     System.out.println("  waiting four seconds...");
                     try {
                         Thread.sleep(4000);
@@ -166,14 +140,12 @@ public class Main {
                 }
 
                 System.out.println("  stop()");
-                c.stop();
+                c.stop(); // Stops the server
             } while (pause);
         } catch (
                 IOException e1) {
             e1.printStackTrace();
         }
-
-
         // kill the server, free its resources
         c.dispose();
 
