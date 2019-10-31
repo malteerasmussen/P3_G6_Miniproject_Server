@@ -36,6 +36,7 @@ public class Main {
         // now add a listener for incoming messages from
         // any of the active connections
         c.addOSCListener(new OSCListener() {
+            List<SocketAddress> clientList = new ArrayList<SocketAddress>();
 
             // Distribute messages to all clients except the client it received the message from
             void distMessages(OSCMessage m, SocketAddress from, int spot, int instrument, String operation) {
@@ -190,8 +191,6 @@ public class Main {
                 IOException e1) {
             e1.printStackTrace();
         }
-
-
         // kill the server, free its resources
         c.dispose();
 
