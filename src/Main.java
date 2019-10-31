@@ -64,6 +64,7 @@ public class Main {
                 // receives messages containing an object and distributes it
                 if (m.getArgCount() > 1) {
                     distMessages(m, addr, (int) m.getArg(0), (int) m.getArg(1), (String) m.getArg(2));
+                    System.out.println(m.getArg(2));
                     if (m.getArgCount() > 2 && m.getArg(2).equals("take")) {
                         stageSpotTaken[(int) m.getArg(0)] = addr;
                         instrumentId[(int) m.getArg(0)] = (int) m.getArg(1);
@@ -138,10 +139,11 @@ public class Main {
                             System.out.println("Client " + clientList.get(i) + " is inactive");
                             for (int j = 0; j < stageSpotTaken.length; j++) {
                                 // check if the client who is inactive has occupied a stageSpot
-                                if (stageSpotTaken[j] == clientList.get(i)) {
+                                if (stageSpotTaken[j] != null && stageSpotTaken[j].equals(clientList.get(i))) {
                                     for (SocketAddress socketAddress : clientList) {
                                         // release the spot for all clients
                                         try {
+                                            System.out.println("freeing the spot");
                                             c.send(new OSCMessage("/server/GUImessage", new Object[]{j, instrumentId[j], "leave"}), socketAddress);
                                         } catch (IOException e1) {
                                             e1.printStackTrace();
@@ -151,6 +153,7 @@ public class Main {
                                     instrumentId[j] = -1;
                                 }
                             }
+                            System.out.println("Removing from clientList");
                             timerList.remove(i);
                             clientList.remove(i);
                             break;
