@@ -64,7 +64,6 @@ public class Main {
                 // receives messages containing an object and distributes it
                 if (m.getArgCount() > 1) {
                     distMessages(m, addr, (int) m.getArg(0), (int) m.getArg(1), (String) m.getArg(2));
-                    System.out.println(m.getArg(2));
                     if (m.getArgCount() > 2 && m.getArg(2).equals("take")) {
                         stageSpotTaken[(int) m.getArg(0)] = addr;
                         instrumentId[(int) m.getArg(0)] = (int) m.getArg(1);
@@ -143,7 +142,6 @@ public class Main {
                                     for (SocketAddress socketAddress : clientList) {
                                         // release the spot for all clients
                                         try {
-                                            System.out.println("freeing the spot");
                                             c.send(new OSCMessage("/server/GUImessage", new Object[]{j, instrumentId[j], "leave"}), socketAddress);
                                         } catch (IOException e1) {
                                             e1.printStackTrace();
@@ -153,7 +151,6 @@ public class Main {
                                     instrumentId[j] = -1;
                                 }
                             }
-                            System.out.println("Removing from clientList");
                             timerList.remove(i);
                             clientList.remove(i);
                             break;
