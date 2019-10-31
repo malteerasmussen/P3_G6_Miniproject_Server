@@ -7,17 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    private static boolean pause = false; // (must be an instance or static field to be useable
-
-
+    private static boolean pause = false; // (must be an instance or static field to be usable
 
 
     // from an anonymous inner class)
 
 
     public static void main(String[] args) {
-        int[] stageSpotTaken = {-1, -1, -1, -1}; // Stores if a stagespots are taken
-        int[] instrumentId = {-1, -1, -1, -1}; // Stores which instruments are chosen on a certain stagespot
+        SocketAddress[] stageSpotTaken = new SocketAddress[4]; // Stores socket address for a spot taken
+        int[] instrumentId = {-1, -1, -1, -1}; // Stores which instruments are chosen on a certain stageSpot
 
         List<SocketAddress> clientList = new ArrayList<SocketAddress>();
         List<Long> timerList = new ArrayList<Long>();
@@ -54,6 +52,7 @@ public class Main {
                     }
                 }
             }
+
             // Determent how to handle the messages
             public void messageReceived(OSCMessage m, SocketAddress addr, long time) {
 
@@ -66,19 +65,19 @@ public class Main {
                 if (m.getArgCount() > 1) {
                     distMessages(m, addr, (int) m.getArg(0), (int) m.getArg(1), (String) m.getArg(2));
                     if (m.getArgCount() > 2 && m.getArg(2).equals("take")) {
-                        stageSpotTaken[(int) m.getArg(0)] = clientList.indexOf(addr);
+                        stageSpotTaken[(int) m.getArg(0)] = addr;
                         instrumentId[(int) m.getArg(0)] = (int) m.getArg(1);
                     }
                     if (m.getArgCount() > 2 && m.getArg(2).equals("leave")) {
-                        stageSpotTaken[(int) m.getArg(0)] = -1;
+                        stageSpotTaken[(int) m.getArg(0)] = null;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
                     if (m.getArgCount() > 2 && m.getArg(2).equals("reserve")) {
-                        stageSpotTaken[(int) m.getArg(0)] = clientList.indexOf(addr);
+                        stageSpotTaken[(int) m.getArg(0)] = addr;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
                     if (m.getArgCount() > 2 && m.getArg(2).equals("release")) {
-                        stageSpotTaken[(int) m.getArg(0)] = -1;
+                        stageSpotTaken[(int) m.getArg(0)] = null;
                         instrumentId[(int) m.getArg(0)] = -1;
                     }
                 }
@@ -110,10 +109,10 @@ public class Main {
                             System.out.println("NANOTIME: " + timeElapsed);
                             c.send(new OSCMessage("/server/setPlayerId", new Object[]{clientList.size(), timeElapsed}), addr);
                             for (int i = 0; i < instrumentId.length; i++) {
-                                if (stageSpotTaken[i] != -1 && instrumentId[i] != -1) {
+                                if (stageSpotTaken[i] != null && instrumentId[i] != -1) {
                                     c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "take"}), addr);
                                 }
-                                if (stageSpotTaken[i] != -1 && instrumentId[i] == -1) {
+                                if (stageSpotTaken[i] != null && instrumentId[i] == -1) {
                                     c.send(new OSCMessage("/GUImessage", new Object[]{i, instrumentId[i], "reserve"}), addr);
                                 }
                             }
@@ -134,26 +133,27 @@ public class Main {
                 try {
                     Thread.sleep(2000);
                     for (int i = 0; i < clientList.size(); i++) {
-                        // check if clients have not send status for 6 seconds
-                        if ((System.currentTimeMillis() - timerList.get(i)) / 1000 > 6) {
+                        // check if clients have not send status for 4 seconds
+                        if ((System.currentTimeMillis() - timerList.get(i)) / 1000 > 4) {
                             System.out.println("Client " + clientList.get(i) + " is inactive");
                             for (int j = 0; j < stageSpotTaken.length; j++) {
                                 // check if the client who is inactive has occupied a stageSpot
-                                if (stageSpotTaken[j] == i) {
+                                if (stageSpotTaken[j] == clientList.get(i)) {
                                     for (SocketAddress socketAddress : clientList) {
+                                        // release the spot for all clients
                                         try {
-                                            // release the spot for all clients
                                             c.send(new OSCMessage("/server/GUImessage", new Object[]{j, instrumentId[j], "leave"}), socketAddress);
                                         } catch (IOException e1) {
                                             e1.printStackTrace();
                                         }
                                     }
-                                    stageSpotTaken[j] = -1;
+                                    stageSpotTaken[j] = null;
                                     instrumentId[j] = -1;
                                 }
                             }
                             timerList.remove(i);
                             clientList.remove(i);
+                            break;
                         }
                     }
                 } catch (InterruptedException e) {
