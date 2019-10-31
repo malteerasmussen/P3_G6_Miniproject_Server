@@ -94,7 +94,7 @@ public class Main {
                             break;
                         }
                     }
-                    if (!alreadyExists) { // Send messages to clients 
+                    if (!alreadyExists) { // Send messages to clients
                         this.clientList.add(addr);
                         System.out.println("New player connected, now there's " + clientList.size());
                         try {
