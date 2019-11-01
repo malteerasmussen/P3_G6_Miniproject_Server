@@ -38,7 +38,7 @@ When receiving status from a client, a timer for that client is reset. If no sta
 in 4 seconds the client is declared as inactive and is removed.
 
 
-##How to set up
+## How to set up
 
 * DELETE EXISTING INTELLIJ PROJECT SERVER FOLDER
 * NEW FROM GIT 
