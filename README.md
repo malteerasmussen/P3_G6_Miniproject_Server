@@ -13,7 +13,7 @@ Choose your favourite instrument and jam with all your friends in front of a liv
 An [OpenSoundControl](http://opensoundcontrol.org/introduction-osc) (OSC) communication library for Java. Documentation for it can be found [here](https://www.sciss.de/netutil/doc/api/index.html). The JAR-file is in the intellij project
 
 
-##Communication
+## Communication
 
 This repository is the server side of the application. The client side can be found [here](https://github.com/lmadza18/P3_G6_Miniproject_Client).
 Running the server is needed in order for multiple clients to play together. The server runs the NetUtil() . 
