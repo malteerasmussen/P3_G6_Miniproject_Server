@@ -1,5 +1,10 @@
 # Megahay - Server
 
+Have you ever dreamt about being a rock star? Now's your chance! 
+Join the infamous rock band Megahay on their World Tour. 
+Choose your favourite instrument and jam with all your friends in front of a live audience.
+
+
 ##Communication
 The server connect all client through a given IP-address. 
 The IP-address needed for the clients to connect, is the 
@@ -11,21 +16,8 @@ The client side of the system can be found
 * sends /helloBack as response
 
 
-##CLIENT
 
-Player%/
-* children are GUI & Sound
-
-Player%/GUI
-* setPlayerID/%int%
-* spot/%/taken or release
-* avatar/%id%
-
-Player%/Sound/%Instrument%
-* /%sampleName%/noteOn or noteOff
-
-
-##HOW TO SET UP
+##How to set up
 
 * DELETE EXISTING INTELLIJ PROJECT SERVER FOLDER
 * NEW FROM GIT 
@@ -48,4 +40,3 @@ who participated in this project.
 ## Acknowledgments
 
 * Thanks to [Molly and Joy-Joy](https://www.goatslive.com/)
-* etc
