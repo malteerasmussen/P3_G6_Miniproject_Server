@@ -42,12 +42,14 @@ in 4 seconds the client is declared as inactive and is removed.
 
 
 ## How to set up
-
-* DELETE EXISTING INTELLIJ PROJECT SERVER FOLDER
-* NEW FROM GIT 
-* GO TO PROJECT STRUCTURE, MARK "SRC" AS "SOURCES", AND UNDER THE PANE 'DEPENDENCIES', ADD THE NETUTIL.JAR
-* UNDER   PROJECT STRUCTURE, under project on the left, set default language bla bal to SDK DEFAULT
-
+(Using IntelliJ)
+* Go to project structure, in "Project". Set Project SDK to Java 11 (11.0.3). 
+* In "Project" set project language level to SDK Default.
+* Copy the project path and set it in Project compiler output field and add "\out" at the end.
+* In Project structure, in "Modules" under dependencies, press the add button (+). 
+Choose 1 JARs or directories and choose the jar file name "netutil-1.1.0.jar"
+* In "Modules", under Sources, choose the src folder and mark as Sources. 
+* Press OK. 
 
 ## Authors
 
