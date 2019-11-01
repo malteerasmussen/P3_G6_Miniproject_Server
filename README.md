@@ -9,6 +9,9 @@ Choose your favourite instrument and jam with all your friends in front of a liv
 
 ## Dependencies
 
+### Java 11
+The project is built in Java 11
+
 ### [NetUtil](https://github.com/Sciss/NetUtil)
 An [OpenSoundControl](http://opensoundcontrol.org/introduction-osc) (OSC) communication library for Java. Documentation for it can be found [here](https://www.sciss.de/netutil/doc/api/index.html). The JAR-file is in the intellij project
 
