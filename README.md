@@ -42,6 +42,11 @@ in 4 seconds the client is declared as inactive and is removed.
 
 
 ## How to set up
+(Using Maven)
+* On mac: in terminal - go to the client folder and run command: "./mvnw package"
+* On windows: in command prompt - go to the client folder and run command: "./mvnw.cmd package"
+
+
 (Using IntelliJ)
 * Go to project structure, in "Project". Set Project SDK to Java 11 (11.0.3). 
 * In "Project" set project language level to SDK Default.
