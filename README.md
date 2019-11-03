@@ -45,6 +45,7 @@ in 4 seconds the client is declared as inactive and is removed.
 (Using Maven)
 * On mac: in terminal - go to the client folder and run command: "./mvnw package"
 * On windows: in command prompt - go to the client folder and run command: "./mvnw.cmd package"
+* To run the server: in terminal/command prompt - go to client folder and run command: "java -jar target/server-0.0.1-SNAPSHOT-jar-with-dependencies.jar"
 
 
 (Using IntelliJ)
